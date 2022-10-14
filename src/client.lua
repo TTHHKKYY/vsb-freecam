@@ -132,7 +132,7 @@ UserInput.InputChanged:Connect(function(Input,Focused)
 				Fov = math.clamp(Fov - (Input.Position.z * 10),1,120)
 				UpdateFov:FireServer(Fov)
 			else
-				MoveSpeed = math.clamp(MoveSpeed + (Input.Position.z * 5),5,500)
+				MoveSpeed = math.max(MoveSpeed + (Input.Position.z * 5),5)
 			end
 		end
 	end
