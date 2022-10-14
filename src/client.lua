@@ -6,6 +6,7 @@ local LocalPlayer = owner
 local GetModel = LocalPlayer.GetCameraModel
 local UpdateModel = LocalPlayer.UpdateCameraModel
 local UpdateFov = LocalPlayer.UpdateModelFieldOfView
+local AddMessage = LocalPlayer.ModelAddMessage
 
 local Camera = workspace.CurrentCamera
 local CameraAngle = {x = 0,y = 0}
@@ -93,23 +94,11 @@ local function CameraStep(RenderTime)
 		RunService.Heartbeat:Wait()
 		
 		HideModel(true)
+		UpdateFov:FireServer(Fov)
 	end
 	
 	UpdateModel:FireServer(Target * CFrame.new(0,0,1))
 end
-
-UserInput.InputChanged:Connect(function(Input,Focused)
-	if not Focused then
-		if Input.UserInputType == Enum.UserInputType.MouseWheel then
-			if Input:IsModifierKeyDown(Enum.ModifierKey.Alt) then
-				Fov = math.clamp(Fov - (Input.Position.z * 10),1,120)
-				UpdateFov:FireServer(Fov)
-			else
-				MoveSpeed = math.clamp(MoveSpeed + (Input.Position.z * 5),5,500)
-			end
-		end
-	end
-end)
 
 local Enabled = false
 local Connection
@@ -133,5 +122,24 @@ UserInput.InputBegan:Connect(function(Input,Focused)
 				Camera.FieldOfView = LastFov
 			end
 		end
+	end
+end)
+
+UserInput.InputChanged:Connect(function(Input,Focused)
+	if Enabled and not Focused then
+		if Input.UserInputType == Enum.UserInputType.MouseWheel then
+			if Input:IsModifierKeyDown(Enum.ModifierKey.Alt) then
+				Fov = math.clamp(Fov - (Input.Position.z * 10),1,120)
+				UpdateFov:FireServer(Fov)
+			else
+				MoveSpeed = math.clamp(MoveSpeed + (Input.Position.z * 5),5,500)
+			end
+		end
+	end
+end)
+
+LocalPlayer.Chatted:Connect(function(Message)
+	if Enabled then
+		AddMessage:FireServer(Message)
 	end
 end)

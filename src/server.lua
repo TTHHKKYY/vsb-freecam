@@ -17,6 +17,7 @@ end
 local GetModel = GetObject(LocalPlayer,"GetCameraModel","RemoteFunction")
 local UpdateModel = GetObject(LocalPlayer,"UpdateCameraModel","RemoteEvent")
 local UpdateFov = GetObject(LocalPlayer,"UpdateModelFieldOfView","RemoteEvent")
+local AddMessage = GetObject(LocalPlayer,"ModelAddMessage","RemoteEvent")
 
 local Model
 local ModelExists = false
@@ -76,6 +77,23 @@ function GetModel.OnServerInvoke(Player)
 		Label.Text = LocalPlayer.Name
 		Label.Parent = Tag
 		
+		local Chat = Instance.new("BillboardGui")
+		
+		Chat.Name = "ChatHistory"
+		Chat.ResetOnSpawn = false
+		Chat.MaxDistance = 120
+		Chat.Size = UDim2.new(4,0,15,0)
+		Chat.StudsOffset = Vector3.new(0,10,0)
+		Chat.Adornee = Head
+		Chat.Parent = Model
+		
+		local ChatLayout = Instance.new("UIListLayout")
+		
+		ChatLayout.Name = "Layout"
+		ChatLayout.FillDirection = Enum.FillDirection.Vertical
+		ChatLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+		ChatLayout.Parent = Chat
+		
 		Model.Destroying:Connect(function()
 			ModelExists = false
 		end)
@@ -100,5 +118,28 @@ UpdateFov.OnServerEvent:Connect(function(Player,Fov)
 		local Aperture = (Fov - 70) / 120
 		
 		Model.Face.Size = Vector3.new(2,1 + Aperture,1 + Aperture)
+	end
+end)
+
+AddMessage.OnServerEvent:Connect(function(Player,Text)
+	if Player == LocalPlayer and ModelExists then
+		local Label = Instance.new("TextLabel")
+		
+		Label.BackgroundTransparency = 1
+		Label.TextStrokeTransparency = 0
+		Label.Size = UDim2.new(1,0,0,25)
+		Label.TextColor3 = Color3.new(1,1,1)
+		Label.TextStrokeColor3 = Color3.new(0,0,0)
+		Label.Text = Text
+		Label.Parent = Model.ChatHistory
+		
+		task.wait(5)
+		
+		for i=1,100 do
+			Label.TextTransparency = i / 100
+			task.wait()
+		end
+		
+		Label:Destroy()
 	end
 end)
