@@ -6,10 +6,11 @@ local LocalPlayer = owner
 local GetModel = LocalPlayer.GetCameraModel
 local UpdateModel = LocalPlayer.UpdateCameraModel
 local UpdateFov = LocalPlayer.UpdateModelFieldOfView
+local UpdateEnabled = LocalPlayer.UpdateModelEnabled
 local AddMessage = LocalPlayer.ModelAddMessage
 
 local Camera = workspace.CurrentCamera
-local CameraAngle = {x = 0,y = 0}
+local CameraAngle = Vector2.new()
 local CameraPosition = Vector3.new()
 
 local MoveSpeed = 50
@@ -63,14 +64,14 @@ local function HideModel(Hidden)
 		Model.Head.LocalTransparencyModifier = Hidden and 1 or 0
 		Model.Face.LocalTransparencyModifier = Hidden and 1 or 0
 		Model.NameTag.PlayerToHideFrom = Hidden and LocalPlayer or nil
+		Model.ChatHistory.PlayerToHideFrom = Hidden and LocalPlayer or nil
 	end
 end
 
 local function CameraStep(RenderTime)
 	local Delta = UserInput:GetMouseDelta() * (Fov / 360)
 	
-	CameraAngle.x = (CameraAngle.x - Delta.x) % 360
-	CameraAngle.y = math.clamp(CameraAngle.y - Delta.y,-90,90)
+	CameraAngle = Vector2.new((CameraAngle.x - Delta.x) % 360,math.clamp(CameraAngle.y - Delta.y,-90,90))
 	
 	local Target = GetCameraCFrame()
 	
@@ -111,6 +112,7 @@ UserInput.InputBegan:Connect(function(Input,Focused)
 			if Enabled then
 				HideModel(true)
 				LockCharacter(true)
+				UpdateEnabled:FireServer(true)
 				
 				LastFov = Camera.FieldOfView
 				Connection = RunService.RenderStepped:Connect(CameraStep)
@@ -118,6 +120,7 @@ UserInput.InputBegan:Connect(function(Input,Focused)
 				Connection:Disconnect()
 				HideModel(false)
 				LockCharacter(false)
+				UpdateEnabled:FireServer(false)
 				
 				Camera.FieldOfView = LastFov
 			end

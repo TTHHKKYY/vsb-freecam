@@ -17,6 +17,7 @@ end
 local GetModel = GetObject(LocalPlayer,"GetCameraModel","RemoteFunction")
 local UpdateModel = GetObject(LocalPlayer,"UpdateCameraModel","RemoteEvent")
 local UpdateFov = GetObject(LocalPlayer,"UpdateModelFieldOfView","RemoteEvent")
+local UpdateEnabled = GetObject(LocalPlayer,"UpdateModelEnabled","RemoteEvent")
 local AddMessage = GetObject(LocalPlayer,"ModelAddMessage","RemoteEvent")
 
 local Model
@@ -121,6 +122,18 @@ UpdateFov.OnServerEvent:Connect(function(Player,Fov)
 	end
 end)
 
+UpdateEnabled.OnServerEvent:Connect(function(Player,Enabled)
+	if Player == LocalPlayer and ModelExists then
+		if Enabled then
+			Model.Head.BrickColor = BrickColor.new("Medium stone grey")
+			Model.Face.BrickColor = BrickColor.new("Dark stone grey")
+		else
+			Model.Head.BrickColor = BrickColor.new("Silver flip/flop")
+			Model.Face.BrickColor = BrickColor.new("Black metallic")
+		end
+	end
+end)
+
 AddMessage.OnServerEvent:Connect(function(Player,Text)
 	if Player == LocalPlayer and ModelExists then
 		local Label = Instance.new("TextLabel")
@@ -137,6 +150,7 @@ AddMessage.OnServerEvent:Connect(function(Player,Text)
 		
 		for i=1,100 do
 			Label.TextTransparency = i / 100
+			Label.TextStrokeTransparency = i / 100
 			task.wait()
 		end
 		
